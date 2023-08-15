@@ -30,7 +30,10 @@ def login_youtube(cookies: list[dict], youtube_url: str) -> WebDriver:
     for cookie in cookies:
         try:
             driver.add_cookie(cookie)
-        except:
+        except Exception:
+            # InvalidCookieDomainException в основном происходит
+            # https://www.selenium.dev/selenium/docs/api/java/org/openqa/selenium/InvalidCookieDomainException.html
+            
             logger.debug(f"Invalid Cookie: {cookie}")
 
     driver.refresh()
@@ -66,17 +69,23 @@ def find_sixth_video(driver) -> bool:
     :returns: True Если нашел видео и перешел на него | False Если не нашел 6-ое видео
     """
 
-    video_elements = WebDriverWait(driver, 10).until(
-        EC.presence_of_all_elements_located((By.CSS_SELECTOR,
-                                             "ytd-video-renderer:not([short-byline]) #video-title"))
-    )[:6]
+    try:
+        video_elements = WebDriverWait(driver, 10).until(
+            EC.presence_of_all_elements_located(
+                (By.CSS_SELECTOR, "ytd-video-renderer:not([short-byline]) #video-title")
+            )
+        )[:6]
 
-    if len(video_elements) == 6:
-        video_elements[5].click()
-        return True
+        if len(video_elements) == 6:
+            video_elements[5].click()
+            return True
 
-    logger.warning("Меньше 6 видео найдено на странице.")
-    return False
+        logger.warning("Меньше 6 видео найдено на странице.")
+        return False
+
+    except TimeoutException:
+        logger.error("Не смог дождаться загрузки всех видео.")
+        return False
 
 
 def like_and_subscribe(driver) -> None:
@@ -105,9 +114,11 @@ def like_and_subscribe(driver) -> None:
     try:
         # Ждем пока загрузиться кнопка подписки.
         subscribe_button = WebDriverWait(driver, 10).until(
-            EC.presence_of_element_located((By.XPATH,
-                                            '//*[@id="subscribe-button-shape"]/button'))
+            EC.presence_of_element_located(
+                (By.XPATH, '//*[@id="subscribe-button-shape"]/button')
+            )
         )
+
         if not subscribe_button.is_displayed():  # Проверяем, что кнопка серая (не показывается)
             logger.info("Уже подписан на канал.")
         else:
@@ -156,10 +167,12 @@ def wait_video_load(driver) -> bool:
     :param driver: Браузер
     :returns: True если видео загрузилось | False если не загрузилось
     """
+
     try:
         WebDriverWait(driver, 30).until(
             EC.presence_of_element_located(
-                (By.CSS_SELECTOR, ".ytp-time-duration"))
+                (By.CSS_SELECTOR, ".ytp-time-duration")
+            )
         )
 
         logger.info("Видео загрузилось")
@@ -176,9 +189,12 @@ def wait_search_results_load(driver) -> bool:
     :param driver: Браузер
     :returns: True если страница поиска загрузилось | False если не загрузилось
     """
+
     try:
         WebDriverWait(driver, 10).until(
-            EC.presence_of_element_located((By.ID, "video-title"))
+            EC.presence_of_element_located(
+                (By.ID, "video-title")
+            )
         )
 
         logger.info("Страница поиска загружена.")
