@@ -1,0 +1,36 @@
+# Общие временные файлы
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Среда виртуальных окружений
+venv/
+ENV/
+env/
+
+# Исключение папок и файлов с куки
+cookies/
+
+# Журналы и отчеты
+*.log
+*.pot
+*.py[cod]
+*.swp
+*.db
+*.sqlite3
+*.dat
+*.pdf
+
+# Файлы IDE
+.vscode/
+.idea/
+*.pydevproject
+*.project
+*.settings/
+*.tmproj
+*.esproj
+*.pyc
+
+# Временные файлы
+.DS_Store
+Thumbs.db
